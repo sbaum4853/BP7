@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breach Protocol Lesson 7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+
+:root{
+  --bg:#0c111c; --panel:#141b2b; --panel2:#1b2438; --line:#2a3550;
+  --text:#e9edf5; --muted:#9aa6bd; --amber:#ffb547; --teal:#3ad6c5;
+  --red:#ff4d5e; --green:#4ade80; --violet:#a78bfa; --blue:#60a5fa;
+  --head:'Space Grotesk',system-ui,sans-serif; --body:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:18px;line-height:1.55;display:flex;flex-direction:column;overflow:hidden}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;border-bottom:1px solid var(--line);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);flex-shrink:0}
+header .sec{color:var(--amber);font-weight:600}
+main{flex:1;overflow-y:auto;display:flex}
+.slide{display:none;width:100%;max-width:1000px;margin:auto;padding:36px 22px 40px}
+.slide.active{display:block;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+footer{flex-shrink:0;border-top:1px solid var(--line);padding:10px 20px;display:flex;align-items:center;gap:14px}
+.bar{flex:1;height:6px;background:var(--panel2);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--amber));width:0;transition:width .3s}
+button{font-family:var(--body);cursor:pointer}
+.nav{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 18px;font-size:15px;font-weight:600}
+.nav:hover{border-color:var(--teal)}
+.nav:disabled{opacity:.35;cursor:default}
+#count{font-family:var(--mono);font-size:13px;color:var(--muted);min-width:64px;text-align:center}
+
+h1,h2,h3{font-family:var(--head);line-height:1.15;margin:0 0 14px}
+h1{font-size:clamp(2.2rem,5.5vw,3.8rem)}
+h2{font-size:clamp(1.7rem,3.6vw,2.5rem)}
+h3{font-size:1.25rem}
+p{margin:0 0 14px}
+.kicker{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:10px}
+.lead{font-size:1.2rem;color:#cfd6e4;max-width:760px}
+.muted{color:var(--muted)}
+.amber{color:var(--amber)} .red{color:var(--red)} .green{color:var(--green)} .teal{color:var(--teal)}
+code{font-family:var(--mono);font-size:.88em;background:var(--panel2);padding:1px 6px;border-radius:4px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:760px){.grid2,.grid3,.grid4{grid-template-columns:1fr}.proj{grid-template-columns:1fr!important}}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{font-size:14px;padding:5px 12px;border-radius:999px;background:var(--panel2);border:1px solid var(--line)}
+.chip.big{font-size:16px;padding:8px 16px}
+.callout{border-left:4px solid var(--amber);background:var(--panel);padding:14px 18px;border-radius:0 10px 10px 0;margin:16px 0}
+.callout.teal{border-color:var(--teal)} .callout.red{border-color:var(--red)} .callout.green{border-color:var(--green)}
+.num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--teal);color:#06231f;font-weight:700;font-family:var(--head);margin-right:10px;flex-shrink:0}
+.step{display:flex;align-items:flex-start;margin:12px 0}
+
+/* project slides */
+.proj{display:grid;grid-template-columns:300px 1fr;gap:28px;align-items:center}
+.art{background:radial-gradient(circle at 50% 40%,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:18px;aspect-ratio:1;display:flex;align-items:center;justify-content:center;color:var(--teal)}
+.art svg{width:78%;height:78%}
+.blink{animation:blink 1s steps(2) infinite}
+.blink2{animation:blink 1s steps(2) .5s infinite}
+@keyframes blink{50%{opacity:.15}}
+.spin{transform-origin:center;transform-box:fill-box;animation:spin .4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* code */
+.code{position:relative;background:#0a0e17;border:1px solid var(--line);border-radius:12px;margin:14px 0}
+.code pre{margin:0;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:15px;line-height:1.6}
+.code .copy{position:absolute;top:10px;right:10px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);font-size:12px;padding:5px 10px;border-radius:6px}
+.code .copy:hover{color:var(--text)}
+.tk{color:#c792ea}.tc{color:#ffcb6b}.tf{color:#82aaff}.tn{color:#f78c6c}.tm{color:#5c6b88;font-style:italic}.ts{color:#c3e88d}
+table{width:100%;border-collapse:collapse;font-size:16px;margin:12px 0}
+td,th{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:500;font-size:13px;text-transform:uppercase;letter-spacing:.08em}
+
+/* reveal & quiz */
+.revealBtn{background:transparent;border:1px dashed var(--amber);color:var(--amber);padding:9px 16px;border-radius:8px;font-weight:600;font-size:15px;margin-top:6px}
+.revealBox{display:none;margin-top:14px}
+.revealBox.show{display:block;animation:in .3s}
+.q{margin:18px 0}
+.opts{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.opt{background:var(--panel2);border:1px solid var(--line);color:var(--text);padding:9px 16px;border-radius:8px;font-size:15px;font-family:var(--mono)}
+.opt.right{border-color:var(--green);background:#123321}
+.opt.wrong{border-color:var(--red);background:#3a141a}
+.qx{display:none;margin-top:8px;font-size:15px;color:#cfd6e4}
+.qx.show{display:block}
+
+/* checklist */
+.check{list-style:none;padding:0;margin:10px 0}
+.check li{margin:10px 0}
+.check label{display:flex;gap:12px;cursor:pointer;align-items:flex-start}
+.check input{width:20px;height:20px;margin-top:4px;accent-color:var(--teal);flex-shrink:0}
+
+/* simulators */
+.sim{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;display:grid;grid-template-columns:220px 1fr;gap:18px}
+@media(max-width:760px){.sim{grid-template-columns:1fr}}
+.wireBtn{width:100%;padding:22px 10px;border-radius:12px;border:2px solid var(--amber);background:#2a2110;color:var(--amber);font-weight:700;font-size:16px;user-select:none;touch-action:none}
+.wireBtn.down{background:var(--amber);color:#1a1205}
+.stats{display:flex;gap:16px;margin-top:12px;font-family:var(--mono);font-size:14px}
+.stats b{display:block;font-size:26px;color:var(--text)}
+.monitor{background:#05080e;border:1px solid var(--line);border-radius:8px;font-family:var(--mono);font-size:14px;color:#9fe8a8;height:220px;overflow:hidden;padding:10px 12px;display:flex;flex-direction:column;justify-content:flex-end}
+.monitor .ttl{color:var(--muted);font-size:11px;letter-spacing:.1em;margin-bottom:auto}
+.small{font-size:14px}
+.resetBtn{background:none;border:1px solid var(--line);color:var(--muted);padding:6px 12px;border-radius:6px;font-size:13px;margin-top:10px}
+
+/* Breach Protocol */
+.bp{--red:#ff3b55}
+.glitch{font-family:var(--mono);font-weight:600;font-size:clamp(2.6rem,8vw,5.4rem);letter-spacing:.06em;color:var(--red);text-shadow:3px 0 #3ad6c5,-3px 0 #ff3b55;animation:gl 2.4s infinite}
+@keyframes gl{0%,92%,100%{transform:none;text-shadow:3px 0 #3ad6c5,-3px 0 #ff3b55}93%{transform:translateX(-4px) skewX(8deg)}95%{transform:translateX(5px);text-shadow:-5px 0 #3ad6c5,5px 0 #ff3b55}97%{transform:none}}
+.bpPanel{background:#100a10;border:1px solid #4a1d28;border-radius:14px;padding:20px}
+.bpGame{background:#08060c;border:1px solid #4a1d28;border-radius:14px;padding:18px}
+.bpHud{display:flex;justify-content:space-between;font-family:var(--mono);font-size:14px;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.bpGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:460px;margin:0 auto}
+.bpNode{position:relative;aspect-ratio:1.4;border-radius:12px;background:#151020;border:2px solid #2c2340;color:var(--muted);font-family:var(--mono);font-size:12px;overflow:hidden}
+.bpNode .led{display:block;width:22px;height:22px;border-radius:50%;margin:10px auto 6px;background:#2a2030}
+.bpNode.armed{border-color:var(--red);color:#ffd2d8}
+.bpNode.armed .led{background:var(--red);box-shadow:0 0 18px var(--red)}
+.bpNode .timer{position:absolute;left:0;bottom:0;height:5px;background:var(--red);width:0}
+.bpNode.armed .timer{animation:drain var(--dur) linear forwards}
+@keyframes drain{from{width:100%}to{width:0}}
+.bpNode.hit{border-color:var(--green)} .bpNode.hit .led{background:var(--green);box-shadow:0 0 18px var(--green)}
+.bpNode.lost{border-color:#7a1626;background:#2a0c13}
+.bpTrack{position:relative;max-width:460px;margin:20px auto 6px;height:44px;border:1px dashed #4a1d28;border-radius:10px}
+.bpCar{position:absolute;top:6px;left:6px;width:44px;height:30px;transition:left .4s}
+.bpBase{position:absolute;right:6px;top:6px;height:30px;padding:0 10px;display:flex;align-items:center;border-radius:6px;background:#132a20;color:var(--green);font-family:var(--mono);font-size:12px;font-weight:600}
+.bpStart{display:block;margin:14px auto 0;background:var(--red);color:#fff;border:none;padding:11px 24px;border-radius:8px;font-weight:700;font-size:16px}
+.bpMsg{text-align:center;font-family:var(--mono);min-height:24px;margin-top:10px}
+.stage{border-radius:12px;padding:16px;background:var(--panel);border:1px solid var(--line);position:relative}
+.stage.here{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber)}
+.stage ol{margin:8px 0 0;padding-left:20px;font-size:15px}
+.stage li{margin:4px 0}
+.here-tag{font-family:var(--mono);font-size:11px;background:var(--amber);color:#1a1205;padding:2px 8px;border-radius:4px;font-weight:600}
+svg text{font-family:var(--body)}
+
+.code pre code{background:none;padding:0;font-size:inherit}
+.g-future{display:none}
+.g-now{filter:drop-shadow(0 0 5px #ffb547) drop-shadow(0 0 2px #ffb547)}
+.wireTbl td:first-child{white-space:nowrap}
+</style>
+</head>
+<body>
+<header><span class="sec" id="sec"></span><span>Advanced Robotics · Breach Protocol</span></header>
+<main id="main">
+
+<!-- ================= OPEN ================= -->
+<section class="slide" data-section="Lesson 7">
+  <div class="kicker">Breach Protocol · Lesson 7</div>
+  <h1>Two motors,<br>one tiny chip.</h1>
+  <p class="lead">Last time you drove one motor with the big L298N. Today you wire up the board the real Antcar will use, the <span class="amber"><b>TB6612FNG</b></span>, and drive <b>two</b> motors at once.</p>
+  <div class="chips"><span class="chip">About 25 minutes</span><span class="chip">TB6612FNG on a breadboard</span><span class="chip">2 TT motors</span><span class="chip">4 × AA battery pack</span><span class="chip">Worksheet</span></div>
+  <div class="callout teal">Keep your <b>Lesson 7 worksheet</b> next to you. Slides with a 📝 have something to fill in.</div>
+</section>
+
+<section class="slide" data-section="Lesson 7">
+  <div class="kicker">Where we are</div>
+  <h2>Phase 2: the Antcar</h2>
+  <div class="grid4">
+    <div class="stage"><span class="here-tag" style="background:var(--green)">DONE</span><h3 class="green" style="margin-top:8px">5 · Two eyes</h3><p class="small">The brain: which way, how hard.</p></div>
+    <div class="stage"><span class="here-tag" style="background:var(--green)">DONE</span><h3 class="green" style="margin-top:8px">6 · First motor</h3><p class="small">L298N, H-bridge, PWM speed, stiction.</p></div>
+    <div class="stage here"><span class="here-tag">TODAY</span><h3 class="amber" style="margin-top:8px">7 · TB6612, two motors</h3><p class="small">The Antcar's real motor driver.</p></div>
+    <div class="stage"><h3 class="muted">Next</h3><p class="small">Motors on a chassis, and a <code>drive()</code> command.</p></div>
+  </div>
+</section>
+
+<section class="slide" data-section="Lesson 7">
+  <div class="kicker">Quick review · from the reading</div>
+  <h2>Same jobs, new names</h2>
+  <table><tr><th>Job</th><th>L298N</th><th>TB6612FNG</th><th>ESP32 pin</th></tr>
+    <tr><td>Motor A direction</td><td>IN1 / IN2</td><td><b>AIN1 / AIN2</b></td><td>27 / 26</td></tr>
+    <tr><td>Motor A speed (PWM)</td><td>ENA</td><td><b>PWMA</b></td><td>25</td></tr>
+    <tr><td>Motor B direction</td><td>IN3 / IN4</td><td><b>BIN1 / BIN2</b></td><td>13 / 18</td></tr>
+    <tr><td>Motor B speed (PWM)</td><td>ENB</td><td><b>PWMB</b></td><td>19</td></tr>
+    <tr><td>Wake up</td><td>(none)</td><td><b>STBY</b></td><td>14</td></tr>
+    <tr><td>Motor power</td><td>+12V terminal</td><td><b>VM</b></td><td>battery +</td></tr>
+    <tr><td>Chip power</td><td>(built in)</td><td><b>VCC</b></td><td>3V3</td></tr>
+  </table>
+  <div class="q"><b>Quick check:</b> everything is wired right, but nothing moves. First suspect?
+    <div class="opts"><button class="opt">PWMA is too high</button><button class="opt" data-ok="1">STBY is LOW, so the chip is asleep</button><button class="opt">The motors need more batteries</button></div>
+    <div class="qx">Right. STBY must be HIGH or the chip ignores everything.</div></div>
+</section>
+
+<!-- ================= BUILD ================= -->
+<section class="slide" data-section="Build It">
+  <div class="kicker">Part 1 · Build it</div>
+  <h2>Gather your parts</h2>
+  <ul class="check">
+    <li><label><input type="checkbox"><span><b>ESP32</b> (Elegoo), <b>data USB cable</b></span></label></li>
+    <li><label><input type="checkbox"><span><b>TB6612FNG</b> with header pins soldered on</span></label></li>
+    <li><label><input type="checkbox"><span><b>Breadboard</b> (a second one is fine if you need more room)</span></label></li>
+    <li><label><input type="checkbox"><span><b>2 TT gear motors</b>, with a wheel or tape flag on each shaft</span></label></li>
+    <li><label><input type="checkbox"><span><b>4 × AA battery pack</b> with a switch</span></label></li>
+    <li><label><input type="checkbox"><span><b>9 male-to-female jumpers</b> (ESP32 → breadboard)</span></label></li>
+    <li><label><input type="checkbox"><span><b>2 short male-to-male jumpers</b> (on the breadboard)</span></label></li>
+    <li><label><input type="checkbox"><span>A small piece of <b>tape</b> and a marker</span></label></li>
+  </ul>
+  <p class="small muted">On the Elegoo board, pins may be labeled with a D: <b>D25</b> means pin 25.</p>
+</section>
+
+<section class="slide" data-section="Build It">
+  <div class="kicker">Part 1 · Safety</div>
+  <h2>One rail is the battery. Treat it that way.</h2>
+  <p>Today the breadboard's top <b class="red">red (+) rail</b> carries <b>battery power, about 6 V</b>. That's almost twice what the ESP32's pins can take.</p>
+  <div class="step"><span class="num">1</span><div><b>Label it.</b> Put tape on the top red rail and write <b>"BATTERY 6V"</b>.</div></div>
+  <div class="step"><span class="num">2</span><div><b>No ESP32 wire ever goes into the battery rail.</b> The ESP32 connects only to the blue GND rail, the VCC pin, and the signal pins.</div></div>
+  <div class="step"><span class="num">3</span><div><b>Battery switch OFF and USB unplugged</b> while you wire.</div></div>
+  <div class="step"><span class="num">4</span><div>Use the ESP32's <b>3V3</b> pin for VCC, <b>not VIN or 5V</b>.</div></div>
+  <div class="callout red">If you smell something hot or a part gets hot to the touch: <b>battery off, USB out</b>, and call your teacher.</div>
+</section>
+
+<section class="slide" data-section="Build It">
+  <div class="kicker">Step 1 of 6 · Mount the driver</div>
+  <h2>TB6612 across the center gap</h2>
+  <div class="card"><div class="buildSvg" data-now="tb"></div></div>
+  <div class="step"><span class="num">1</span><div>Push the TB6612 into the breadboard so it <b>straddles the center gap</b>, one row of pins on each side, like a bridge.</div></div>
+  <div class="step"><span class="num">2</span><div>Turn it so the <b>VM, VCC, GND, AO1…</b> side faces the <b>top</b> rails, and the <b>PWMA, AIN2, AIN1, STBY…</b> side faces down.</div></div>
+  <div class="callout teal">Every pin now owns a short column of 4 free holes. To connect to a pin, plug into its column.</div>
+</section>
+
+<section class="slide" data-section="Build It">
+  <div class="kicker">Step 2 of 6 · Motor power</div>
+  <h2>Battery, VM, and ground</h2>
+  <div class="card"><div class="buildSvg" data-now="bat,vm,gndP"></div></div>
+  <div class="step"><span class="num">3</span><div>Battery switch <b>OFF</b>. Battery <b class="red">red</b> wire → top <b class="red">red (+) rail</b>. Battery <b>black</b> wire → top <b style="color:#60a5fa">blue (–) rail</b>.</div></div>
+  <div class="step"><span class="num">4</span><div>Short jumper: <b>VM</b>'s column → <b class="red">red rail</b>.</div></div>
+  <div class="step"><span class="num">5</span><div>Short jumper: the <b>GND</b> next to VCC → <b style="color:#60a5fa">blue rail</b>.</div></div>
+</section>
+
+<section class="slide" data-section="Build It">
+  <div class="kicker">Step 3 of 6 · Brain power</div>
+  <h2>ESP32 GND and 3V3</h2>
+  <div class="card"><div class="buildSvg" data-now="gndE,v33"></div></div>
+  <div class="step"><span class="num">6</span><div>ESP32 <b>GND</b> → <b style="color:#60a5fa">blue rail</b>. This is the <b>shared ground</b>: ESP32, driver, and battery all meet here.</div></div>
+  <div class="step"><span class="num">7</span><div>ESP32 <b>3V3</b> → <b>VCC</b>'s column. This powers the chip's logic, not the motors.</div></div>
+</section>
+
+<section class="slide" data-section="Build It">
+  <div class="kicker">Step 4 of 6 · The motors</div>
+  <h2>Motor A and motor B</h2>
+  <div class="card"><div class="buildSvg" data-now="motA,motB"></div></div>
+  <div class="step"><span class="num">8</span><div><b>Motor A:</b> one wire into <b>AO1</b>'s column, the other into <b>AO2</b>'s column.</div></div>
+  <div class="step"><span class="num">9</span><div><b>Motor B:</b> one wire into <b>BO1</b>'s column, the other into <b>BO2</b>'s column.</div></div>
+  <p class="small muted">Thin motor wires can be loose in a breadboard. Push them in firmly and give them a gentle tug.</p>
+</section>
+
+<section class="slide" data-section="Build It">
+  <div class="kicker">Step 5 of 6 · Motor A signals</div>
+  <h2>PWMA, AIN2, AIN1, STBY</h2>
+  <div class="card"><div class="buildSvg" data-now="w25,w26,w27,w14"></div></div>
+  <div class="step"><span class="num">10</span><div>ESP32 <b>25</b> → <b>PWMA</b>'s column.</div></div>
+  <div class="step"><span class="num">11</span><div>ESP32 <b>26</b> → <b>AIN2</b>'s column.</div></div>
+  <div class="step"><span class="num">12</span><div>ESP32 <b>27</b> → <b>AIN1</b>'s column.</div></div>
+  <div class="step"><span class="num">13</span><div>ESP32 <b>14</b> → <b>STBY</b>'s column.</div></div>
+</section>
+
+<section class="slide" data-section="Build It">
+  <div class="kicker">Step 6 of 6 · Motor B signals</div>
+  <h2>BIN1, BIN2, PWMB</h2>
+  <div class="card"><div class="buildSvg" data-now="w13,w18,w19"></div></div>
+  <div class="step"><span class="num">14</span><div>ESP32 <b>13</b> → <b>BIN1</b>'s column.</div></div>
+  <div class="step"><span class="num">15</span><div>ESP32 <b>18</b> → <b>BIN2</b>'s column.</div></div>
+  <div class="step"><span class="num">16</span><div>ESP32 <b>19</b> → <b>PWMB</b>'s column.</div></div>
+</section>
+
+<section class="slide" data-section="Build It">
+  <div class="kicker">📝 Final check · fill in worksheet Part A</div>
+  <h2>All connections</h2>
+  <div class="card"><div class="buildSvg" data-now=""></div></div>
+  <table class="wireTbl"><tr><th>TB6612 pin</th><th>Connects to</th></tr>
+    <tr><td>VM</td><td>red rail (battery +)</td></tr>
+    <tr><td>VCC</td><td>ESP32 3V3</td></tr>
+    <tr><td>GND</td><td>blue rail (with battery black and ESP32 GND)</td></tr>
+    <tr><td>AO1 / AO2</td><td>motor A</td></tr>
+    <tr><td>BO1 / BO2</td><td>motor B</td></tr>
+    <tr><td>PWMA / AIN2 / AIN1 / STBY</td><td>ESP32 25 / 26 / 27 / 14</td></tr>
+    <tr><td>BIN1 / BIN2 / PWMB</td><td>ESP32 13 / 18 / 19</td></tr>
+  </table>
+  <div class="callout red">Last look: nothing from the ESP32 goes into the <b>red</b> rail.</div>
+</section>
+
+<!-- ================= BUILD 1 ================= -->
+<section class="slide" data-section="Build 1">
+  <div class="kicker">Build 1 · wake it up</div>
+  <h2>Spin motor A</h2>
+  <div class="code"><button class="copy">Copy</button><pre><code>const int STBY = 14;
+const int AIN1 = 27;
+const int AIN2 = 26;
+const int PWMA = 25;
+
+void setup() {
+  pinMode(STBY, OUTPUT);
+  pinMode(AIN1, OUTPUT);
+  pinMode(AIN2, OUTPUT);
+
+  digitalWrite(STBY, HIGH);   // wake the chip up
+
+  digitalWrite(AIN1, HIGH);   // direction: one way
+  digitalWrite(AIN2, LOW);
+  analogWrite(PWMA, 200);     // speed: 200 out of 255
+}
+
+void loop() {
+}</code></pre></div>
+  <p>Plug in USB, upload, then switch the <b>battery ON</b>. Motor A spins. 🎉</p>
+  <div class="callout">📝 <b>Worksheet B1:</b> change <code>digitalWrite(STBY, HIGH)</code> to <code>LOW</code> and upload again. What happens? Then change it back.</div>
+</section>
+
+<section class="slide" data-section="Build 1">
+  <div class="kicker">Build 1 · not spinning?</div>
+  <h2>Troubleshooting</h2>
+  <table><tr><th>If…</th><th>Check</th></tr>
+    <tr><td>Nothing at all</td><td>Battery switch on? <b>STBY</b> wire on pin 14 and in STBY's column? Shared GND: ESP32 GND, battery black, and driver GND all in the blue rail?</td></tr>
+    <tr><td>Still nothing</td><td>VCC really connected to <b>3V3</b>? VM really in the red rail? Is the driver pushed all the way into the breadboard?</td></tr>
+    <tr><td>Motor B spins instead of A</td><td>Your motor wires are in the B columns. Move them to AO1/AO2.</td></tr>
+    <tr><td>It twitches or hums</td><td>A motor wire is loose in its column, or the batteries are weak.</td></tr>
+    <tr><td>The driver gets hot</td><td><b>Battery off now.</b> Usually VM and VCC are swapped or something is shorted. Ask for help.</td></tr>
+  </table>
+</section>
+
+<!-- ================= BUILD 2 ================= -->
+<section class="slide" data-section="Build 2">
+  <div class="kicker">Build 2 · both motors, every direction</div>
+  <h2>The motor test routine</h2>
+  <div class="code"><button class="copy">Copy</button><pre><code>const int STBY = 14;
+const int AIN1 = 27;
+const int AIN2 = 26;
+const int PWMA = 25;
+const int BIN1 = 13;
+const int BIN2 = 18;
+const int PWMB = 19;
+
+void setup() {
+  pinMode(STBY, OUTPUT);
+  pinMode(AIN1, OUTPUT);
+  pinMode(AIN2, OUTPUT);
+  pinMode(BIN1, OUTPUT);
+  pinMode(BIN2, OUTPUT);
+  digitalWrite(STBY, HIGH);
+  analogWrite(PWMA, 200);
+  analogWrite(PWMB, 200);
+}
+
+void loop() {
+  // 1. A forward, B forward
+  digitalWrite(AIN1, HIGH); digitalWrite(AIN2, LOW);
+  digitalWrite(BIN1, HIGH); digitalWrite(BIN2, LOW);
+  delay(2000);
+
+  // 2. both coast to a stop
+  digitalWrite(AIN1, LOW);  digitalWrite(AIN2, LOW);
+  digitalWrite(BIN1, LOW);  digitalWrite(BIN2, LOW);
+  delay(1000);
+
+  // 3. A reverse, B reverse
+  digitalWrite(AIN1, LOW);  digitalWrite(AIN2, HIGH);
+  digitalWrite(BIN1, LOW);  digitalWrite(BIN2, HIGH);
+  delay(2000);
+
+  // 4. both brake
+  digitalWrite(AIN1, HIGH); digitalWrite(AIN2, HIGH);
+  digitalWrite(BIN1, HIGH); digitalWrite(BIN2, HIGH);
+  delay(1000);
+
+  // 5. opposite directions: A forward, B reverse
+  digitalWrite(AIN1, HIGH); digitalWrite(AIN2, LOW);
+  digitalWrite(BIN1, LOW);  digitalWrite(BIN2, HIGH);
+  delay(2000);
+}</code></pre></div>
+  <p class="small muted"><code>delay()</code> is fine for a test routine that has nothing else to do.</p>
+</section>
+
+<section class="slide" data-section="Build 2">
+  <div class="kicker">📝 Build 2 · observe · worksheet B2</div>
+  <h2>Watch each step</h2>
+  <p>Upload, battery ON, and watch the routine a few times. On your worksheet, record what the motors do in each step.</p>
+  <div class="grid2">
+    <div class="card"><h3 class="amber">Coast vs. brake</h3><p>During step 2 (both LOW), gently spin a wheel by hand. During step 4 (both HIGH), try again. Which one resists?</p></div>
+    <div class="card"><h3 class="teal">Opposite directions</h3><p>In step 5, the motors turn opposite ways. On a robot with one motor on each side, what would that make the robot do?</p></div>
+  </div>
+  <button class="revealBtn">Check: the TB6612 rules</button>
+  <div class="revealBox">
+    <table><tr><th>IN1</th><th>IN2</th><th>Motor</th></tr>
+      <tr><td>HIGH</td><td>LOW</td><td>spins one way</td></tr>
+      <tr><td>LOW</td><td>HIGH</td><td>spins the other way</td></tr>
+      <tr><td>HIGH</td><td>HIGH</td><td><b>brake</b>: stops fast, resists turning</td></tr>
+      <tr><td>LOW</td><td>LOW</td><td><b>coast</b>: power off, spins freely to a stop</td></tr>
+      <tr><td colspan="2">STBY LOW</td><td>everything off, no matter what</td></tr>
+    </table>
+    <p class="small">One difference from the L298N: there, both LOW also braked. On the TB6612, both LOW coasts. Step 5 is how a tank (or an Antcar) <b>spins in place</b>.</p>
+  </div>
+</section>
+
+<!-- ================= BUILD 3 ================= -->
+<section class="slide" data-section="Build 3">
+  <div class="kicker">Build 3 · one function, any speed, any direction</div>
+  <h2>setMotor()</h2>
+  <p>Writing three lines for every motor change gets old fast. Let's make one function that takes a speed from <b>−255 to 255</b>: positive is one way, negative is the other, and 0 is stop.</p>
+  <div class="code"><button class="copy">Copy</button><pre><code>const int STBY = 14;
+const int AIN1 = 27;
+const int AIN2 = 26;
+const int PWMA = 25;
+const int BIN1 = 13;
+const int BIN2 = 18;
+const int PWMB = 19;
+
+// speed: -255 (full reverse) to 255 (full forward)
+void setMotor(int in1, int in2, int pwm, int speed) {
+  if (speed > 0) {
+    digitalWrite(in1, HIGH);
+    digitalWrite(in2, LOW);
+  } else if (speed < 0) {
+    digitalWrite(in1, LOW);
+    digitalWrite(in2, HIGH);
+  } else {
+    digitalWrite(in1, LOW);     // 0 = coast
+    digitalWrite(in2, LOW);
+  }
+  analogWrite(pwm, abs(speed));  // the size of the number is the speed
+}
+
+void setup() {
+  pinMode(STBY, OUTPUT);
+  pinMode(AIN1, OUTPUT);
+  pinMode(AIN2, OUTPUT);
+  pinMode(BIN1, OUTPUT);
+  pinMode(BIN2, OUTPUT);
+  digitalWrite(STBY, HIGH);
+}
+
+void loop() {
+  setMotor(AIN1, AIN2, PWMA, 200);    // A forward, fast
+  setMotor(BIN1, BIN2, PWMB, 100);    // B forward, slow
+  delay(2000);
+
+  setMotor(AIN1, AIN2, PWMA, -150);   // A reverse
+  setMotor(BIN1, BIN2, PWMB, -150);   // B reverse
+  delay(2000);
+
+  setMotor(AIN1, AIN2, PWMA, 0);      // both stop
+  setMotor(BIN1, BIN2, PWMB, 0);
+  delay(1000);
+}</code></pre></div>
+</section>
+
+<section class="slide" data-section="Build 3">
+  <div class="kicker">Build 3 · how it works</div>
+  <h2>The sign is the direction. The size is the speed.</h2>
+  <table><tr><th>Code</th><th>What it means</th></tr>
+    <tr><td><code>void setMotor(int in1, int in2, int pwm, int speed)</code></td><td>A function with four inputs: which three pins belong to this motor, and how fast. One function works for <b>both</b> motors.</td></tr>
+    <tr><td><code>if (speed &gt; 0)</code> … <code>else if (speed &lt; 0)</code></td><td>The <b>sign</b> picks the direction.</td></tr>
+    <tr><td><code>analogWrite(pwm, abs(speed))</code></td><td>The <b>size</b> sets the speed. <code>abs(-150)</code> is 150.</td></tr>
+  </table>
+  <div class="callout teal"><b>Sound familiar?</b> In Lesson 5, <code>diff</code> worked the same way: its sign said which way to turn, and its size said how hard. That's not a coincidence. Soon, the eyes' <code>diff</code> will flow straight into <code>setMotor()</code>.</div>
+  <div class="callout">📝 <b>Worksheet B3:</b> write your own 3-step motor "dance" using <code>setMotor()</code>, upload it, and see if it does what you predicted.</div>
+</section>
+
+<section class="slide" data-section="Build 3">
+  <div class="kicker">📝 Investigate · worksheet C</div>
+  <h2>Is the TB6612 really better?</h2>
+  <p>Find motor A's <b>starting speed</b> again: the smallest number that gets it turning from a stop. Try <code>setMotor(AIN1, AIN2, PWMA, 60)</code>, then 50, then 40… and record where it stops working.</p>
+  <p>Compare it to your L298N starting speed from Lesson 6.</p>
+  <button class="revealBtn">What should I expect?</button>
+  <div class="revealBox"><p>Usually the TB6612 starts the motor at a <b>lower</b> number. The L298N lost about 2 V before the motor got anything, so it needed a bigger PWM push. Less wasted voltage = more of each pulse reaches the motor. Your numbers may vary with batteries and motors; that's real data.</p></div>
+</section>
+
+<section class="slide" data-section="Build 3">
+  <div class="kicker">Level up (optional)</div>
+  <h2>Finished early?</h2>
+  <div class="grid3">
+    <div class="card"><h3 class="amber">Smooth start</h3><p>Instead of jumping to 200, ramp from 0 to 200 over one second using <code>millis()</code>. Real robots do this so they don't jerk or slip.</p></div>
+    <div class="card"><h3 class="red">Kill switch</h3><p>Put a wire on pin 4 with <code>INPUT_PULLUP</code> (Lesson 1!). When it touches GND, set STBY LOW: an emergency stop for both motors.</p></div>
+    <div class="card"><h3 class="teal">Measure it</h3><p>Motor A at 255. Measure the battery voltage, then the voltage across AO1 and AO2. How much does the TB6612 lose, compared to the L298N?</p></div>
+  </div>
+</section>
+
+<!-- ================= WRAP ================= -->
+<section class="slide bp" data-section="Wrap-up">
+  <div class="kicker" style="color:var(--red)">Next class</div>
+  <h2>The Antcar gets a body.</h2>
+  <p class="lead">Next, the two motors go onto a chassis, one on each side. Then we turn <code>setMotor()</code> into <code>drive(left, right)</code>, the command the Antcar will use for everything: forward, backward, turning, and spinning in place.</p>
+  <p class="lead">After that, the eyes come back. Brain + muscle = a robot that hunts light.</p>
+</section>
+
+<section class="slide" data-section="Wrap-up">
+  <div class="kicker">Wrap-up</div>
+  <h2>Before you go to your project</h2>
+  <ul class="check">
+    <li><label><input type="checkbox"><span>Build 1: motor A spun, and I tested STBY LOW.</span></label></li>
+    <li><label><input type="checkbox"><span>Build 2: I recorded what each step did, and felt coast vs. brake.</span></label></li>
+    <li><label><input type="checkbox"><span>Build 3: my own setMotor() dance ran.</span></label></li>
+    <li><label><input type="checkbox"><span>My worksheet is filled in, including the questions in Part D.</span></label></li>
+    <li><label><input type="checkbox"><span><b>Battery switched OFF</b> before I put things away.</span></label></li>
+  </ul>
+</section>
+
+</main>
+<footer>
+  <button class="nav" id="prev">← Back</button>
+  <div class="bar"><i id="barFill"></i></div>
+  <span id="count"></span>
+  <button class="nav" id="next">Next →</button>
+</footer>
+
+<template id="boardTpl">
+<svg viewBox="0 0 900 520" style="width:100%">
+  <g data-g="base">
+    <!-- ESP32 -->
+    <rect x="15" y="110" width="160" height="390" rx="10" fill="#1f2a3a" stroke="#0d131c" stroke-width="2"/>
+    <text x="65" y="300" fill="#cfd6e4" font-size="16" text-anchor="middle" font-weight="700">ESP32</text>
+    <g font-size="13" font-weight="700" text-anchor="end" fill="#ffd34d">
+      <circle cx="165" cy="150" r="6" fill="#e0b84a"/><text x="152" y="155">3V3</text>
+      <circle cx="165" cy="190" r="6" fill="#e0b84a"/><text x="152" y="195">GND</text>
+      <circle cx="165" cy="300" r="6" fill="#e0b84a"/><text x="152" y="305">25</text>
+      <circle cx="165" cy="330" r="6" fill="#e0b84a"/><text x="152" y="335">26</text>
+      <circle cx="165" cy="360" r="6" fill="#e0b84a"/><text x="152" y="365">27</text>
+      <circle cx="165" cy="390" r="6" fill="#e0b84a"/><text x="152" y="395">14</text>
+      <circle cx="165" cy="420" r="6" fill="#e0b84a"/><text x="152" y="425">13</text>
+      <circle cx="165" cy="450" r="6" fill="#e0b84a"/><text x="152" y="455">18</text>
+      <circle cx="165" cy="480" r="6" fill="#e0b84a"/><text x="152" y="485">19</text>
+    </g>
+    <!-- breadboard -->
+    <rect x="225" y="110" width="570" height="400" rx="10" fill="#f3f1ea" stroke="#b9b4a6" stroke-width="2"/>
+    <line x1="240" y1="130" x2="780" y2="130" stroke="#d33" stroke-width="3"/>
+    <line x1="240" y1="155" x2="780" y2="155" stroke="#2a62d6" stroke-width="3"/>
+    <rect x="250" y="120" width="96" height="16" rx="3" fill="#fff5c2" stroke="#c9a227"/>
+    <text x="298" y="132" fill="#a11" font-size="10" text-anchor="middle" font-weight="700">BATTERY 6V</text>
+    <text x="785" y="126" fill="#d33" font-size="10" text-anchor="end" font-weight="700">red (+)</text>
+    <text x="785" y="170" fill="#2a62d6" font-size="10" text-anchor="end" font-weight="700">blue (–) GND</text>
+    <g fill="#9a9a9a" id="holes"></g>
+    <rect x="240" y="295" width="540" height="10" fill="#dcd8cc"/>
+    <text x="770" y="303" fill="#888" font-size="9" text-anchor="end">center gap</text>
+  </g>
+  <g data-g="tb">
+    <rect x="410" y="268" width="320" height="64" rx="5" fill="#b8282f" stroke="#7a1418" stroke-width="2"/>
+    <text x="400" y="296" fill="#b8282f" font-size="13" text-anchor="end" font-weight="700">TB6612FNG</text>
+    <text x="400" y="312" fill="#888" font-size="10" text-anchor="end">(straddles the gap)</text>
+    <g fill="#fff" font-size="9" text-anchor="middle" font-weight="700" id="tbTop"></g>
+    <g fill="#fff" font-size="9" text-anchor="middle" font-weight="700" id="tbBot"></g>
+  </g>
+  <g data-g="bat">
+    <rect x="805" y="160" width="85" height="80" rx="6" fill="#222" stroke="#000"/>
+    <text x="847" y="196" fill="#cfd6e4" font-size="11" text-anchor="middle" font-weight="700">4 × AA</text>
+    <text x="847" y="212" fill="#9aa6bd" font-size="10" text-anchor="middle">pack</text>
+    <path d="M825 160 C 825 135, 800 130, 770 130" stroke="#d33" stroke-width="4" fill="none"/>
+    <path d="M865 160 C 865 150, 800 155, 770 155" stroke="#111" stroke-width="4" fill="none"/>
+  </g>
+  <g data-g="vm"><path d="M430 180 C 420 160, 420 145, 430 130" stroke="#d33" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+  <g data-g="gndP"><path d="M510 180 C 500 170, 500 162, 510 155" stroke="#2a62d6" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+  <g data-g="gndE"><path d="M165 190 C 220 190, 260 160, 280 155" stroke="#111" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+  <g data-g="v33"><path d="M165 150 C 300 150, 380 90, 470 205" stroke="#ff4d8a" stroke-width="6" fill="none" stroke-linecap="round"/></g>
+  <g data-g="motA">
+    <circle cx="570" cy="55" r="30" fill="#e8c21a" stroke="#8a6a14" stroke-width="2"/>
+    <text x="570" y="60" fill="#5a4100" font-size="13" text-anchor="middle" font-weight="700">motor A</text>
+    <path d="M556 82 C 552 130, 550 160, 550 230" stroke="#d33" stroke-width="3" fill="none"/>
+    <path d="M584 82 C 588 130, 590 160, 590 230" stroke="#111" stroke-width="3" fill="none"/>
+  </g>
+  <g data-g="motB">
+    <circle cx="660" cy="55" r="30" fill="#e8c21a" stroke="#8a6a14" stroke-width="2"/>
+    <text x="660" y="60" fill="#5a4100" font-size="13" text-anchor="middle" font-weight="700">motor B</text>
+    <path d="M646 82 C 642 130, 630 160, 630 230" stroke="#d33" stroke-width="3" fill="none"/>
+    <path d="M674 82 C 678 130, 670 160, 670 230" stroke="#111" stroke-width="3" fill="none"/>
+  </g>
+  <g data-g="w25"><path d="M165 300 C 300 300, 400 345, 430 345" stroke="#3ad6c5" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+  <g data-g="w26"><path d="M165 330 C 320 330, 440 370, 470 370" stroke="#a78bfa" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+  <g data-g="w27"><path d="M165 360 C 330 360, 480 395, 510 395" stroke="#60a5fa" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+  <g data-g="w14"><path d="M165 390 C 340 390, 520 420, 550 420" stroke="#ff7a1a" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+  <g data-g="w13"><path d="M165 420 C 360 425, 560 445, 590 445" stroke="#4ade80" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+  <g data-g="w18"><path d="M165 450 C 380 460, 600 470, 630 470" stroke="#f2b705" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+  <g data-g="w19"><path d="M165 480 C 400 495, 640 495, 670 490" stroke="#ff4d5e" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+</svg>
+</template>
+
+<script>
+(function(){
+  const ORDER=['base','tb','bat','vm','gndP','gndE','v33','motA','motB','w25','w26','w27','w14','w13','w18','w19'];
+  const COLS=[430,470,510,550,590,630,670,710].slice(0,8);
+  const top=['VM','VCC','GND','AO1','AO2','BO2','BO1','GND'],bot=['PWMA','AIN2','AIN1','STBY','BIN1','BIN2','PWMB','GND'];
+  const X=[430,470,510,550,590,630,670,710];
+  let holes='';X.forEach(x=>{[180,205,230,255].forEach(y=>holes+='<rect x="'+(x-4)+'" y="'+(y-4)+'" width="8" height="8"/>');[345,370,395,420,445,470,490].forEach(y=>holes+='<rect x="'+(x-4)+'" y="'+(y-4)+'" width="8" height="8"/>');});
+  let tt='',tbb='';X.forEach((x,i)=>{tt+='<rect x="'+(x-4)+'" y="272" width="8" height="8" fill="#e0b84a"/><text x="'+x+'" y="293">'+top[i]+'</text>';tbb+='<rect x="'+(x-4)+'" y="320" width="8" height="8" fill="#e0b84a"/><text x="'+x+'" y="315">'+bot[i]+'</text>';});
+  const tpl=document.getElementById('boardTpl').innerHTML
+    .replace('<g fill="#9a9a9a" id="holes"></g>','<g fill="#9a9a9a">'+holes+'</g>')
+    .replace('<g fill="#fff" font-size="9" text-anchor="middle" font-weight="700" id="tbTop"></g>','<g fill="#fff" font-size="9" text-anchor="middle" font-weight="700">'+tt+'</g>')
+    .replace('<g fill="#fff" font-size="9" text-anchor="middle" font-weight="700" id="tbBot"></g>','<g fill="#fff" font-size="9" text-anchor="middle" font-weight="700">'+tbb+'</g>');
+  document.querySelectorAll('.buildSvg').forEach(el=>{
+    el.innerHTML=tpl;
+    const now=el.dataset.now?el.dataset.now.split(','):[];
+    const lastIdx=now.length?Math.max(...now.map(n=>ORDER.indexOf(n))):ORDER.length-1;
+    el.querySelectorAll('[data-g]').forEach(g=>{
+      const idx=ORDER.indexOf(g.dataset.g);
+      if(now.includes(g.dataset.g))g.classList.add('g-now');
+      else if(idx>lastIdx)g.classList.add('g-future');
+    });
+  });
+
+  const slides=[...document.querySelectorAll('.slide')];
+  const main=document.getElementById('main');
+  const KEY='bp_lesson7_slide';
+  let cur=0;
+  try{const s=parseInt(localStorage.getItem(KEY),10);if(s>=0&&s<slides.length)cur=s;}catch(e){}
+  try{const h=parseInt(location.hash.slice(1),10);if(h>=1&&h<=slides.length)cur=h-1;}catch(e){}
+  function show(i){
+    cur=Math.max(0,Math.min(slides.length-1,i));
+    slides.forEach((s,k)=>s.classList.toggle('active',k===cur));
+    document.getElementById('sec').textContent=slides[cur].dataset.section||'';
+    document.getElementById('count').textContent=(cur+1)+' / '+slides.length;
+    document.getElementById('barFill').style.width=((cur+1)/slides.length*100)+'%';
+    document.getElementById('prev').disabled=cur===0;
+    document.getElementById('next').disabled=cur===slides.length-1;
+    main.scrollTop=0;
+    try{localStorage.setItem(KEY,cur);}catch(e){}
+  }
+  document.getElementById('prev').onclick=()=>show(cur-1);
+  document.getElementById('next').onclick=()=>show(cur+1);
+  document.addEventListener('keydown',e=>{
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+    if(e.key==='ArrowRight'||e.key==='PageDown')show(cur+1);
+    if(e.key==='ArrowLeft'||e.key==='PageUp')show(cur-1);
+    if(e.key==='Home')show(0);
+  });
+  document.querySelectorAll('.code').forEach(box=>{
+    const codeEl=box.querySelector('code');const raw=codeEl.textContent;
+    const esc=raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    codeEl.innerHTML=esc.replace(/(\/\/.*$)|("(?:[^"\\]|\\.)*")|\b(const|int|void|if|else|return|unsigned|long|bool|for|float)\b|\b(HIGH|LOW|INPUT_PULLUP|OUTPUT|INPUT|true|false)\b|\b(pinMode|digitalRead|digitalWrite|analogRead|analogWrite|abs|map|delay|millis|Serial|begin|println|print|setup|loop|setMotor)\b|\b(\d+(?:\.\d+)?)\b/gm,
+      (m,c,s,k,co,f,n)=>c?'<span class="tm">'+c+'</span>':s?'<span class="ts">'+s+'</span>':k?'<span class="tk">'+k+'</span>':co?'<span class="tc">'+co+'</span>':f?'<span class="tf">'+f+'</span>':'<span class="tn">'+n+'</span>');
+    const b=box.querySelector('.copy');
+    b.onclick=()=>{
+      const done=()=>{b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1500);};
+      function fallback(){const t=document.createElement('textarea');t.value=raw;document.body.appendChild(t);t.select();try{document.execCommand('copy');done();}catch(e){}t.remove();}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(raw).then(done,fallback);}else fallback();
+    };
+  });
+  document.querySelectorAll('.revealBtn').forEach(b=>b.onclick=()=>{b.nextElementSibling.classList.add('show');b.style.display='none';});
+  document.querySelectorAll('.q').forEach(q=>{
+    q.querySelectorAll('.opt').forEach(o=>o.onclick=()=>{
+      if(o.dataset.ok){o.classList.add('right');q.querySelector('.qx').classList.add('show');}
+      else{o.classList.add('wrong');}
+    });
+  });
+  show(cur);
+})();
+</script>
+</body>
+</html>
